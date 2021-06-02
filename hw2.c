@@ -20,69 +20,67 @@
 #define COMP_ERR 4
 
 int check_hex(char* optarg){
-    int length = strlen (optarg);
-    for (int i=0;i<length; i++){
-        if (!isdigit(optarg[i]))
-        {
-            return 0x1ffffff;
-        }
-    }
+	int length = strlen (optarg);
+	for (int i = 0; i < length ; i++){
+		if (!isdigit(optarg[i]))
+			return 0x1ffffff;
+	}
 
-    int num = atoi(optarg);
-    if(num >=0 && num <256){
-        return num;
-    }
+	int num = atoi(optarg);
+	if(num >= 0 && num < 256){
+		return num;
+	}
     
-    return 0x1ffffff;;
+	return 0x1ffffff;;
 }
 
 int adjust_reg(int reg, char* opt, int offset){
-    int num = check_hex(opt);
-    if(num>0xffffff){
-        return 0x1ffffff;
-    }
-    num=num<<offset;
-    reg += num;
-    return reg;
+	int num = check_hex(opt);
+	if(num>0xffffff){
+		return 0x1ffffff;
+	}
+	num = num << offset;
+	reg += num;
+	return reg;
 }
 
-int getopt(int argc, char *const argv[],const char *optstring);
+int getopt(int argc, char* const argv[],const char* optstring);
 
-int main(int argc, char *argv[]){
-    struct nfb_device *dev;
-    char c;
-    int ret = 0;
-    struct list_range index_range;
-    list_range_init(&index_range);
+int main(int argc, char* argv[]){
+	struct nfb_device* dev;
+	char c;
+	int ret = 0;
+	struct list_range index_range;
+	list_range_init(&index_range);
 
-    extern char *optarg;
-    extern int optopt;
+	extern char* optarg;
+	extern int optopt;
 
-    char *file = NFB_PATH_DEV(0);
-    int reg = 0x000000;
+	char* file = NFB_PATH_DEV(0);
+	int reg = 0x000000;
 
-    while ((c = getopt(argc, argv, ARGUMENTS)) != -1) {
-	switch (c) {
-	case 'd':
-		file = optarg;
-		break;
-	case 'i':
-		if (list_range_parse(&index_range, optarg) < 0)
-			errx(EXIT_FAILURE, "Cannot parse interface number.");
-		break;
-        case 'f':
-            reg = adjust_reg(reg, optarg, 16);
-            break;
-        case 'l':
-            reg = adjust_reg(reg, optarg, 8);
-            break;
-        case 's':
-            reg = adjust_reg(reg, optarg, 0);
-            break;
+	while ((c = getopt(argc, argv, ARGUMENTS)) != -1) {
+		switch (c) {
+		case 'd':
+			file = optarg;
+			break;
+		case 'i':
+			if (list_range_parse(&index_range, optarg) < 0)
+				errx(EXIT_FAILURE, "Cannot parse interface number.");
+			break;
+        	case 'f':
+            		reg = adjust_reg(reg, optarg, 16);
+            		break;
+        	case 'l':
+			reg = adjust_reg(reg, optarg, 8);
+			break;
+		case 's':
+			reg = adjust_reg(reg, optarg, 0);
+			break;
 		default:
 			err(-EINVAL, "Unknown argument -%c", optopt);
 		}
-    }
+	}
 
 	if(reg>0xffffff){
 		ret = -REG_ERR;
@@ -117,7 +115,7 @@ int main(int argc, char *argv[]){
 	printf(" _________________________  \n");
 	printf("|  read_reg  | write_reg  | \n");
 	printf("|============|============| \n");			
-    	printf("| 0x%08x | 0x%08x |\n", read_reg, write_reg);
+	printf("| 0x%08x | 0x%08x |\n", read_reg, write_reg);
 	printf(" ------------------------- \n\n");
 	
 	nfb_comp_write32(comp, 0, write_reg);	
