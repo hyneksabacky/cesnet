@@ -61,24 +61,24 @@ int main(int argc, char* argv[]){
 
 	while ((c = getopt(argc, argv, ARGUMENTS)) != -1) {
 		switch (c) {
-		case 'd':
-			file = optarg;
-			break;
-		case 'i':
-			if (list_range_parse(&index_range, optarg) < 0)
-				errx(EXIT_FAILURE, "Cannot parse interface number.");
-			break;
-        	case 'f':
-            		reg = adjust_reg(reg, optarg, 16);
-            		break;
-        	case 'l':
-			reg = adjust_reg(reg, optarg, 8);
-			break;
-		case 's':
-			reg = adjust_reg(reg, optarg, 0);
-			break;
-		default:
-			err(-EINVAL, "Unknown argument -%c", optopt);
+			case 'd':
+				file = optarg;
+				break;
+			case 'i':
+				if (list_range_parse(&index_range, optarg) < 0)
+					errx(EXIT_FAILURE, "Cannot parse interface number.");
+				break;
+			case 'f':
+				reg = adjust_reg(reg, optarg, 16);
+				break;
+			case 'l':
+				reg = adjust_reg(reg, optarg, 8);
+				break;
+			case 's':
+				reg = adjust_reg(reg, optarg, 0);
+				break;
+			default:
+				err(-EINVAL, "Unknown argument -%c", optopt);
 		}
 	}
 
