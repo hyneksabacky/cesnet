@@ -20,7 +20,7 @@ int check_hex(char* optarg){
     for (int i=0;i<length; i++){
         if (!isdigit(optarg[i]))
         {
-            return -1;
+            return 0x1ffffff;
         }
     }
 
@@ -29,19 +29,15 @@ int check_hex(char* optarg){
         return num;
     }
     
-    return -1;
+    return 0x1ffffff;;
 }
 
 int adjust_reg(int reg, char* opt, int offset){
     int num = check_hex(opt);
-    if(num<0){
-        fprintf( stderr, "Invalid number: %s\n", opt);
-        exit(-1);
+    if(num>0xffffff){
+        return 0x1ffffff;
     }
-    for(int i=0;i<offset;i++){
-        num *= 16;
-
-    }
+    num=num<<offset;
     reg += num;
     printf("0x%06x\n", reg);
     return reg;
@@ -62,19 +58,19 @@ int main(int argc, char *argv[]){
     int reg = 0x000000;
 
     while ((c = getopt(argc, argv, ARGUMENTS)) != -1) {
-		switch (c) {
-		case 'd':
-			file = optarg;
-			break;
-		case 'i':
-			if (list_range_parse(&index_range, optarg) < 0)
-				errx(EXIT_FAILURE, "Cannot parse interface number.");
-			break;
+	switch (c) {
+	case 'd':
+		file = optarg;
+		break;
+	case 'i':
+		if (list_range_parse(&index_range, optarg) < 0)
+			errx(EXIT_FAILURE, "Cannot parse interface number.");
+		break;
         case 'f':
-            reg = adjust_reg(reg, optarg, 4);
+            reg = adjust_reg(reg, optarg, 16);
             break;
         case 'l':
-            reg = adjust_reg(reg, optarg, 2);
+            reg = adjust_reg(reg, optarg, 8);
             break;
         case 's':
             reg = adjust_reg(reg, optarg, 0);
@@ -83,13 +79,47 @@ int main(int argc, char *argv[]){
 			err(-EINVAL, "Unknown argument -%c", optopt);
 		}
 	}
+	
+	
+	
+	/*if(reg>0xffffff){
+		list_range_destroy(&index_range);
+		fprintf( stderr, "Invalid register configuration.\n");
+        	exit(-1);
+	}
 
     dev = nfb_open(file);
         if (dev == NULL) {
             err(errno, "Can't open NFB device");
         }
 
-
-
-    nfb_close(dev);
+	void* fdt = nfb_get_fdt(dev);
+	if(fdt == NULL){
+		list_range_destroy(&index_range);
+		nfb_close(dev);
+		err(errno, "get FDT error");
+	}
+	
+	int fdt_offset = fdt_path_offset(fdt, "/firmware/mi_bus/nic_application/core0");	
+	struct ndp_comp *comp = nfb_comp_open(dev, fdt_offset);
+	if(comp == NULL){
+		list_range_destroy(&index_range);
+		nfb_close(dev);
+		err(errno, "Can't open component");
+	}
+	
+	void *buff = NULL;
+	
+	if(nfb_comp_read(comp,buf,32,0)<0){
+		list_range_destroy(&index_range);
+		nfb_close(dev);
+		err(errno, "Invalid component read");
+	}
+	
+	
+	
+	
+    nfb_close(dev);*/
+    
+    return 0;
 }
